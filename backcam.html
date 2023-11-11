@@ -60,18 +60,20 @@
 
   function takePhoto() {
     const dataURI = getBase64Image(localVideo);
+    photo.width = localVideo.videoWidth;
+    photo.height = localVideo.videoHeight;
     photo.src = dataURI;
   }
 
-  function getBase64Image(element) {
+  function getBase64Image(video) {
     // New Canvas
     var canvas = document.createElement("canvas");
-    canvas.width = element.width;
-    canvas.height = element.height;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
     var ctx = canvas.getContext("2d");
 
     // Draw Image
-    ctx.drawImage(element, 0, 0);
+    ctx.drawImage(video, 0, 0);
 
     // To Base64
     return canvas.toDataURL("image/jpeg");
