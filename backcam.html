@@ -11,16 +11,22 @@
 <button id="start_button" onclick="startCamera()">Start</button>
 &nbsp;
 <button id="stop_button" onclick="stopCamera()">Stop</button>
+&nbsp;&nbsp;
+<button id="take_photo_button" onclick="takePhoto()">Take Photo</button>
 <br />
+
 <!--
 <video width="640" height="480" autoplay playsinline style="border: 1px gray solid; width:320px; height: 240px;"></video>
 -->
 <video width="640" height="960" autoplay playsinline style="border: 1px gray solid; width:320px; height: 480px;"></video>
+<br />
+<img id="photo" src="" style="border: 1px blue solid; width:320px; height: 480px;">
 
 
 </body>
 <script>
   const localVideo = document.querySelector('video');
+  const photo = document.getElementById('photo');
   let localStream = null;
   async function startCamera() {
     try {
@@ -52,5 +58,23 @@
     }
   }
 
+  function takePhoto() {
+    const dataURI = getBase64Image(localVideo);
+    photo.src = dataURI;
+  }
+
+  function getBase64Image(element) {
+    // New Canvas
+    var canvas = document.createElement("canvas");
+    canvas.width = element.width;
+    canvas.height = element.height;
+    var ctx = canvas.getContext("2d");
+
+    // Draw Image
+    ctx.drawImage(element, 0, 0);
+
+    // To Base64
+    return canvas.toDataURL("image/jpeg");
+  }
 </script>
 </html>
