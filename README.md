@@ -14,11 +14,13 @@
 # TODO
 
 - [ ] スマホブラウザで動作
-  - [ ] iPhone Safari
+  - [x] iPhone Safari
   - [ ] Andorid Chrome
-- [ ] 背面カメラの映像を取得
-  - [ ] mediadevices.getUserMedia()
+- [x] 背面カメラの映像を取得
+  - [x] mediadevices.getUserMedia()
 - [ ] 映像から画像を取得、Base64変換
+  - [x] Canvasを使ってDataURLを取得
+  - [ ] pythonのBase64と合わせる
 - [ ] 音声入力
   - [ ] speech API
   - [ ] or getUserMedia()
