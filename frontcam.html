@@ -20,18 +20,19 @@
   let localStream = null;
   async function startCamera() {
     try {
-        const constraints = {
-            video: {
-                facingMode: "user" // フロントカメラを使用
-            }
-        };
+      const constraints = {
+        video: {
+          //facingMode: "user" // フロントカメラを使用
+          facingMode: "environment" // 背面カメラを使用
+        }
+      };
 
-        // カメラの映像を取得
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      // カメラの映像を取得
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
-        // <video> エレメントにストリームを設定
-        localVideo.srcObject = stream;
-        await localVideo.play();
+      // <video> エレメントにストリームを設定
+      localVideo.srcObject = stream;
+      await localVideo.play();
     } catch (error) {
         console.error('カメラのアクセスに失敗しました:', error);
     }

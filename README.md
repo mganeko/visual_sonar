@@ -18,9 +18,15 @@
   - [ ] Andorid Chrome
 - [ ] 背面カメラの映像を取得
   - [ ] mediadevices.getUserMedia()
+- [ ] 映像から画像を取得、Base64変換
 - [ ] 音声入力
   - [ ] speech API
   - [ ] or getUserMedia()
 - [ ] 最初の起動を声で（Siri＋ショートカット）
+
+# Refer 参考
+
+- https://dev.classmethod.jp/articles/openai-new-features-nodejs/
+- https://dev.classmethod.jp/articles/openai-update-at-devday/
 
 
