@@ -10,6 +10,9 @@
 - 画像について、音声入力で細かい様子を質問できるようにしたい
 - 質問 or 次の撮影にすすむかを、音声で制御(Functin Calling?)
 
+# page
+
+- [backcam.html](backcam.html)
 
 # TODO
 
