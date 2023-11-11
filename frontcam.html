@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<title>フロントカメラ</title>
+</head>
+<body>
+<h1>フロントカメラ</h1>
+<p>フロントカメラの画像を表示します。</p>
+<button id="start_button" onclick="startCamera()">Start</button>
+&nbsp;
+<button id="stop_button" onclick="stopCamera()">Stop</button>
+<br />
+<video width="640" height="480" autoplay style="border: 1px gray solid;"></video>
+
+</body>
+<script>
+  const localVideo = document.querySelector('video');
+  let localStream = null;
+  async function startCamera() {
+    try {
+        const constraints = {
+            video: {
+                facingMode: "user" // フロントカメラを使用
+            }
+        };
+
+        // カメラの映像を取得
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+        // <video> エレメントにストリームを設定
+        localVideo.srcObject = stream;
+        await localVideo.play();
+    } catch (error) {
+        console.error('カメラのアクセスに失敗しました:', error);
+    }
+  }
+
+  function stopCamera() {
+    if (localVideo.srcObject) {
+      localVideo.pause();
+      localVideo.srcObject.getTracks().forEach(track => {
+          track.stop();
+      });
+      localVideo.srcObject = null;
+    }
+  }
+
+</script>
+</html>
