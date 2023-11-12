@@ -24,6 +24,8 @@
 - [ ] 映像から画像を取得、Base64変換
   - [x] Canvasを使ってDataURLを取得
   - [ ] pythonのBase64と合わせる
+- [ ] chat gpt-4-vision-preview で画像を送信
+  - [ ] chatWithImage() 関数を用意
 - [ ] 音声入力
   - [ ] speech API
   - [ ] or getUserMedia()
@@ -34,4 +36,5 @@
 - https://dev.classmethod.jp/articles/openai-new-features-nodejs/
 - https://dev.classmethod.jp/articles/openai-update-at-devday/
 
+- https://developer.mozilla.org/ja/docs/Web/API/SpeechRecognition
 

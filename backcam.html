@@ -60,6 +60,7 @@
 
   function takePhoto() {
     const dataURI = getBase64Image(localVideo);
+    console.log(dataURI);
     photo.width = localVideo.videoWidth;
     photo.height = localVideo.videoHeight;
     photo.src = dataURI;
@@ -77,6 +78,11 @@
 
     // To Base64
     return canvas.toDataURL("image/jpeg");
+
+    // result
+    // data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QB ... +JN3Z6fJ5jtYIskjTqWnRm5WNkb7qHndQB//9k=
   }
+
+
 </script>
 </html>
