@@ -25,9 +25,10 @@
   - [x] Canvasを使ってDataURLを取得
   - [ ] pythonのBase64と合わせる
 - [ ] chat gpt-4-vision-preview で画像を送信
-  - [ ] chatWithImage() 関数を用意
-  - [ ] image URL ... public URL
+  - [x] singleChatWithImage() 関数を用意
+  - [x] image URL ... public URL
   - [ ] image URL with Base64
+  - [ ] 履歴を扱う、multipleChatWithImage() 関数を用意
 - [ ] 音声入力
   - [ ] speech API
   - [ ] or getUserMedia()

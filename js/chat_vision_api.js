@@ -134,6 +134,43 @@ async function postChatText(text, ctx, options) {
   return response;
 }
 
+/*
+ * 画像とテキストで単独のチャットを行うチャットメッセージを送信する
+ */
+/**
+* 画像のURLとチャットメッセージを送信し、応答を返す
+* @description ctx.chat_messages にやりとりは蓄積しない
+* @param {string} image_url - 画像のURL
+* @param {string} text - ユーザーからのテキスト
+* @param {object} ctx - GPTコンテキスト
+* @param {object} options - オプション(null可)。{ temperature: xxx } のみ有効
+* @returns {object} 応答 - { role: 'assistant' / 'error', content: 生成されたテキスト }
+* @example postChatText('世界で一番高い山は？, ctx); // returns { role: 'assistant', content: 'エベレスト'}
+*/
+async function singleChatWithImage(image_url, text, ctx, options) {
+  const userMessage = {
+    role: 'user',
+    content: [
+      {
+        "type": "text",
+        "text": text,
+      },
+      {
+        "type": "image_url",
+        "image_url": {
+          "url": image_url,
+        }
+      }
+    ]
+  };
+
+  // -- request --
+  const response = await _chatCompletion([userMessage], ctx.apiKey, ctx.model, ctx.url, options);
+  _debugLog(response);
+
+  return response;
+}
+
 // ===== streaming function =====
 /*
  * チャットメッセージを送信し、ストリーミングで応答を返す
