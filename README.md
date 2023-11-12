@@ -26,6 +26,8 @@
   - [ ] pythonのBase64と合わせる
 - [ ] chat gpt-4-vision-preview で画像を送信
   - [ ] chatWithImage() 関数を用意
+  - [ ] image URL ... public URL
+  - [ ] image URL with Base64
 - [ ] 音声入力
   - [ ] speech API
   - [ ] or getUserMedia()
