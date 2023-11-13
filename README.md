@@ -27,7 +27,7 @@
 - [ ] chat gpt-4-vision-preview で画像を送信
   - [x] singleChatWithImage() 関数を用意
   - [x] image URL ... public URL
-  - [ ] image URL with Base64
+  - [x] image URL with Base64
   - [ ] 履歴を扱う、multipleChatWithImage() 関数を用意
 - [ ] 音声入力
   - [ ] speech API

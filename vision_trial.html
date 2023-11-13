@@ -10,6 +10,13 @@
 <body>
 <h1>Vision-Preview</h1>
 <button id="ask_button" onclick="askAboutImage()">Ask</button>
+&nbsp;
+<button id="ask_button" onclick="askAboutImageBase64()">Ask with Base64</button>
+
+<br />
+<img id="photo" src="img/palmtree.jpg" style="border: 1px blue solid; width:320px; height: 480px;">
+<canvas id="canvas" style="border: 1px blue solid; width:320px; height: 480px;"></canvas>
+
 </body>
 <script>
   // ==== global context ===
@@ -23,6 +30,26 @@
     const text = 'What is this? Please answer in Japanese.';
     const options = { temperature: 0 };
     const response = await singleChatWithImage(imageUrl, text, gptCtx, options);
+    console.log('====== answer ======');
+    console.log(response);
+  }
+
+  async function askAboutImageBase64() {
+    // --- draw image to canvas ---
+    const imageUrl = 'https://mganeko.github.io/visual_sonar/img/palmtree.jpg';
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const image = document.getElementById('photo');
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    
+    // To Base64
+    const base64data = canvas.toDataURL("image/jpeg");
+    console.log('base64data:', base64data);
+
+    // --- send image to GPT ---
+    const text = 'What is this? Please answer in Japanese.';
+    const options = { temperature: 0 };
+    const response = await singleChatWithImage(base64data, text, gptCtx, options);
     console.log('====== answer ======');
     console.log(response);
   }
