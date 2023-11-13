@@ -27,8 +27,9 @@
     const imageUrl = 'https://mganeko.github.io/visual_sonar/img/palmtree.jpg';
 
     // --- send image to GPT ---
-    const text = 'What is this? Please answer in Japanese.';
-    const options = { temperature: 0 };
+    //const text = 'What is this? Please answer in Japanese.';
+    const text = 'この画像に何が写っているか詳しく教えてください。'
+    const options = { temperature: 0, max_tokens: 1000};
     const response = await singleChatWithImage(imageUrl, text, gptCtx, options);
     console.log('====== answer ======');
     console.log(response);
@@ -47,8 +48,9 @@
     console.log('base64data:', base64data);
 
     // --- send image to GPT ---
-    const text = 'What is this? Please answer in Japanese.';
-    const options = { temperature: 0 };
+    //const text = 'What is this? Please answer in Japanese.';
+    const text = 'この画像に何が写っているか教えてください。'
+    const options = { temperature: 0, max_tokens: 1000 };
     const response = await singleChatWithImage(base64data, text, gptCtx, options);
     console.log('====== answer ======');
     console.log(response);

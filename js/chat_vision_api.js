@@ -7,14 +7,15 @@ const _debugMode = true; // true / false
 //const _debugMode = false; // true / false
 
 // ---- GPT-3.5 ----
-const _DEFAULT_CHAT_MODEL = "gpt-3.5-turbo";
-const _DEFAULT_TOKEN_LIMIT = 3900;
-const _MAX_TOKEN_LIMIT = _DEFAULT_TOKEN_LIMIT - 1000;
-//const _TOKEN_LIMIT = 1000; // for debug, cause ERROR
+// const _DEFAULT_CHAT_MODEL = "gpt-3.5-turbo";
+// const _DEFAULT_TOKEN_LIMIT = 3900;
+// const _MAX_TOKEN_LIMIT = _DEFAULT_TOKEN_LIMIT - 1000;
+////const _TOKEN_LIMIT = 1000; // for debug, cause ERROR
 
 // ---- GPT-4 ----
-//const _CHAT_MODEL = "gpt-4";
-//const _TOKEN_LIMIT = 7900;
+const _DEFAULT_CHAT_MODEL = "gpt-4";
+const _DEFAULT_TOKEN_LIMIT = 7900;
+const _MAX_TOKEN_LIMIT = _DEFAULT_TOKEN_LIMIT - 1000;
 
 // ---- API URL ---
 const _DEFAULT_CHATAPI_URL = "https://api.openai.com/v1/chat/completions";
@@ -95,7 +96,7 @@ function addChatHistory(ctx, role, text) {
 * @description ctx.chat_messages に配列としてやりとりが蓄積される
 * @param {string} text - ユーザーからのテキスト
 * @param {object} ctx - GPTコンテキスト
-* @param {object} options - オプション(null可)。{ temperature: xxx } のみ有効
+* @param {object} options - オプション(null可)。{ temperature: xxxx, max_tokens: xxxx } のみ有効
 * @returns {object} 応答 - { role: 'assistant' / 'error', content: 生成されたテキスト }
 * @example postChatText('世界で一番高い山は？, ctx); // returns { role: 'assistant', content: 'エベレスト'}
 */
@@ -143,7 +144,7 @@ async function postChatText(text, ctx, options) {
 * @param {string} image_url - 画像のURL
 * @param {string} text - ユーザーからのテキスト
 * @param {object} ctx - GPTコンテキスト
-* @param {object} options - オプション(null可)。{ temperature: xxx } のみ有効
+* @param {object} options - オプション(null可)。{ temperature: xxxx, max_tokens: xxxx } のみ有効
 * @returns {object} 応答 - { role: 'assistant' / 'error', content: 生成されたテキスト }
 * @example postChatText('世界で一番高い山は？, ctx); // returns { role: 'assistant', content: 'エベレスト'}
 */
