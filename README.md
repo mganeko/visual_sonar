@@ -15,6 +15,7 @@
 - [backcam.html](backcam.html)
 - [vision_trial](vision_trial.html)
 - [vsonar](vsonar.html)
+- [speech_trial](speech_trial.html)
 
 # TODO
 
