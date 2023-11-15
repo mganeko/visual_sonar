@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <title>背面カメラ</title>
+  <script src="js/config.js"></script>
+  <script src="js/chat_vision_api.js"></script>
+</head>
+
+<body>
+  <h1>Visual Sonar</h1>
+  <p>背面カメラの映像を表示して、内容を説明します</p>
+  <button id="start_button" onclick="startCamera()">Start</button>
+  &nbsp;
+  <button id="stop_button" onclick="stopCamera()">Stop</button>
+  &nbsp;&nbsp;
+  <button id="take_photo_button" onclick="takePhoto()">Take Photo</button>
+  &nbsp;
+  <button id="explaine_image_button" onclick="explaineImage()">Explain</button>
+  <br />
+
+  <!--
+<video width="640" height="480" autoplay playsinline style="border: 1px gray solid; width:320px; height: 240px;"></video>
+-->
+  <video width="640" height="960" autoplay playsinline
+    style="border: 1px gray solid; width:320px; height: 480px;"></video>
+  <br />
+  <img id="photo" src="" style="border: 1px blue solid; width:320px; height: 480px;">
+
+
+</body>
+<script>
+  const localVideo = document.querySelector('video');
+  const photo = document.getElementById('photo');
+  let localStream = null;
+  async function startCamera() {
+    try {
+      const constraints = {
+        video: {
+          //facingMode: "user" // フロントカメラを使用
+          facingMode: "environment" // 背面カメラを使用
+        }
+      };
+
+      // カメラの映像を取得
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+      // <video> エレメントにストリームを設定
+      localVideo.srcObject = stream;
+      await localVideo.play();
+    } catch (error) {
+      console.error('カメラのアクセスに失敗しました:', error);
+    }
+  }
+
+  function stopCamera() {
+    if (localVideo.srcObject) {
+      localVideo.pause();
+      localVideo.srcObject.getTracks().forEach(track => {
+        track.stop();
+      });
+      localVideo.srcObject = null;
+    }
+  }
+
+  function takePhoto() {
+    const dataURI = getBase64Image(localVideo);
+    console.log(dataURI);
+    photo.width = localVideo.videoWidth;
+    photo.height = localVideo.videoHeight;
+    photo.src = dataURI;
+  }
+
+  async function explaineImage() {
+    const imageUrl = photo.src;
+
+    console.log('====== start ask ======');
+    const response = await askAboutImage(imageUrl);
+
+    console.log('====== answer ======');
+    console.log(response.content);
+  }
+
+  function getBase64Image(video) {
+    // New Canvas
+    var canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    var ctx = canvas.getContext("2d");
+
+    // Draw Image
+    ctx.drawImage(video, 0, 0);
+
+    // TODO: use offlineCanvas
+
+    // To Base64
+    return canvas.toDataURL("image/jpeg");
+
+    // result
+    // data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QB ... +JN3Z6fJ5jtYIskjTqWnRm5WNkb7qHndQB//9k=
+  }
+
+  // ==== global context ===
+  let gptCtx = null;
+
+  // ---- try gpt4-vision-preview ---
+  async function askAboutImage(imageUrl) {
+    // --- send image to GPT ---
+    //const text = 'What is this? Please answer in Japanese.';
+    const text = 'この画像に何が写っているか、目が不自由な人向けに詳しく教えてください。'
+    const options = { temperature: 0, max_tokens: 1000 };
+    const response = await singleChatWithImage(imageUrl, text, gptCtx, options);
+
+    return response;
+  }
+
+  // --- initalize option ---
+  function buildInitOptions() {
+    const options = {};
+    if (API_URL && API_URL.length > 0) {
+      options.url = API_URL;
+    }
+    if (MODEL_NAME && MODEL_NAME.length > 0) {
+      options.model = MODEL_NAME;
+    }
+    if (SEND_TOKEN_LIMIT && SEND_TOKEN_LIMIT > 0) {
+      options.sendTokenLimt = SEND_TOKEN_LIMIT;
+    }
+
+    return options;
+  }
+
+
+  // --- init Gpt context ---
+  const options = buildInitOptions();
+  //console.log('option for INIT:', options)
+  gptCtx = initChat(API_KEY, options); // Chatを初期化し、GPTコンテキストを保持する
+
+
+</script>
+
+</html>

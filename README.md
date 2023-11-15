@@ -13,6 +13,8 @@
 # page
 
 - [backcam.html](backcam.html)
+- [vision_trial](vision_trial.html)
+- [vsonar](vsonar.html)
 
 # TODO
 

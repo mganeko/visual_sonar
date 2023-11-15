@@ -82,7 +82,7 @@ function clearChatHistory(ctx) {
 * @example addChatHistory(ctx, 'user', 'よく眠れる方法は？'); // returns nothing
 */
 function addChatHistory(ctx, role, text) {
-  if ((!ctx) || (!ctx.chat_messages)) 
+  if ((!ctx) || (!ctx.chat_messages))
     return;
 
   ctx.chat_messages.push({ role: role, content: text });
@@ -303,8 +303,8 @@ function _mergeOptions(body, options) {
   // max_tokens
   if (options?.max_tokens) {
     const max_tokens = options.max_tokens;
-    if (max_tokens> _MAX_TOKEN_LIMIT) {
-      throw(`max_tokens(${max_tokens}) is over the limit(${_MAX_TOKEN_LIMIT}).`);
+    if (max_tokens > _MAX_TOKEN_LIMIT) {
+      throw (`max_tokens(${max_tokens}) is over the limit(${_MAX_TOKEN_LIMIT}).`);
     }
     body['max_tokens'] = options.max_tokens;
   }
