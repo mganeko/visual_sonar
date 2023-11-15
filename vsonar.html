@@ -92,6 +92,7 @@
   }
 
   async function explainImage() {
+    disableElementById('explain_image_button');
     const imageUrl = photo.src;
 
     console.log('====== start ask ======');
@@ -102,15 +103,18 @@
     console.log('====== answer ======');
     console.log(response.content);
     divExplain.innerText = response.content;
+    enableElementById('explain_image_button');
   }
 
   async function explainInVoice() {
     const text = divExplain.innerText;
+    disableElementById('explain_voice_button');
 
     const responseBlob = await textToSpeech(text, apiKey);
     if (responseBlob) {
       await playbacBlobAsync(playbackAudio, responseBlob);
     }
+    enableElementById('explain_voice_button');
   }
 
   function getBase64Image(video) {
