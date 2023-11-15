@@ -95,7 +95,8 @@
     const imageUrl = photo.src;
 
     console.log('====== start ask ======');
-    divExplain.innerText = '-- start explain --'
+    //divExplain.innerText = '-- start explain --'
+    divExplain.innerText = '--start-- ' + imageUrl;
     const response = await askAboutImage(imageUrl);
 
     console.log('====== answer ======');
