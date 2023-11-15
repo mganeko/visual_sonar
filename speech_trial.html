@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Speech</title>
+  <script src="js/config.js"></script>
+</head>
+
+<body>
+  <h1>Text-to-speech</h1>
+  <button id="speak_button" onclick="speakTest()">Speek</button>
+  <br />
+  <audio id="playback_audio"></audio>
+</body>
+
+
+<script>
+  const playbackAudio = document.getElementById('playback_audio');
+
+  async function speakTest() {
+    const text = "本日は晴天なり";
+    await speech(text);
+  }
+
+  async function speech(text) {
+    const apiUrl = 'https://api.openai.com/v1/audio/speech';
+    const apiKey = API_KEY;
+
+    // -- build header --
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    };
+
+    // --- build body ---
+    const bodyJson = {
+      model: 'tts-1',
+      input: text,
+      voice: "alloy",
+    };
+    const body = JSON.stringify(bodyJson);
+
+    // --- request ---
+    console.log('post tts');
+    const res = await fetch(apiUrl, {
+      method: "POST",
+      headers: headers,
+      body,
+    }).catch(e => {
+      console.error(e);
+      return {
+        role: 'error',
+        content: 'Network ERROR, Plase try again.',
+      };
+    });
+    // if (res?.role === 'error') {
+    //   return res;
+    // }
+    console.log('end tts');
+    console.log(res);
+
+    // エラー判定
+    if (!res.ok) {
+      return;
+    }
+
+    // --- 再生 ---
+    // https://zenn.dev/nok_c7/articles/6276f23aedb679
+    const responseBlob = await res.blob();
+
+    // const blobUrl = URL.createObjectURL(responseBlob);
+    // await playbackAsync(blobUrl);
+
+    await playbacBlobAsync(responseBlob);
+    console.log('playbackAsync returned');
+
+  }
+
+  async function playbackAsync(url) {
+    playbackAudio.src = url;
+    playbackAudio.onload = (evt) => {
+      console.log('onload');
+    };
+    playbackAudio.onerror = (evt) => {
+      console.error('ERROR');
+    };
+    playbackAudio.onended = (evt) => {
+      console.log('playback end');
+    };
+    await playbackAudio.play();
+  }
+
+  async function playbacBlobAsync(blob) {
+    const blobUrl = URL.createObjectURL(blob);
+    playbackAudio.src = blobUrl;
+    playbackAudio.onload = (evt) => {
+      console.log('onload');
+    };
+    playbackAudio.onerror = (evt) => {
+      console.error('ERROR');
+    };
+    playbackAudio.onended = (evt) => {
+      console.log('playback end');
+      URL.revokeObjectURL(blobUrl);
+    };
+    await playbackAudio.play();
+  }
+
+  /*--
+  curl https://api.openai.com/v1/audio/speech \
+    -H "Authorization: Bearer $OPENAI_API_KEY" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "model": "tts-1",
+      "input": "The quick brown fox jumped over the lazy dog.",
+      "voice": "alloy"
+    }' \
+    --output speech.mp3
+  --*/
+
+
+</script>
+
+</html>
