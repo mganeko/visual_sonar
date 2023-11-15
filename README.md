@@ -26,12 +26,21 @@
   - [x] mediadevices.getUserMedia()
 - [ ] 映像から画像を取得、Base64変換
   - [x] Canvasを使ってDataURLを取得
+  - [ ] offlineCanvasを使う
   - [ ] pythonのBase64と合わせる
 - [ ] chat gpt-4-vision-preview で画像を送信
   - [x] singleChatWithImage() 関数を用意
   - [x] image URL ... public URL
   - [x] image URL with Base64
   - [ ] 履歴を扱う、multipleChatWithImage() 関数を用意
+- [ ] api key
+  - [ ] QueryStringから取得
+  - [ ] inputから取得
+- [ ] ログ出力
+  - [ ] 画面に出す  
+- [ ] 音声出力(tts)
+  - [ ] ttsのテスト
+  - [ ] 取得内容を音声でプレイバック
 - [ ] 音声入力
   - [ ] speech API
   - [ ] or getUserMedia()
