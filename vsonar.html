@@ -7,11 +7,16 @@
   <title>背面カメラ</title>
   <script src="js/config.js"></script>
   <script src="js/chat_vision_api.js"></script>
+  <script src="js/ui_helper.js"></script>
 </head>
 
 <body>
   <h1>Visual Sonar</h1>
   <p>背面カメラの映像を表示して、内容を説明します</p>
+  <!--
+  api key <input type="text" id="api_key_input" /><br />
+  -->
+
   <button id="start_button" onclick="startCamera()">Start</button>
   &nbsp;
   <button id="stop_button" onclick="stopCamera()">Stop</button>
@@ -27,7 +32,7 @@
   <video width="640" height="960" autoplay playsinline
     style="border: 1px gray solid; width:320px; height: 480px;"></video>
   <br />
-  <div id="explain_result" style="border: 1px gray solid; width:320px; height:240px;"></div>
+  <div id="explain_result" style="border: 1px gray solid; width:320px; height:240px; font-size: small;"></div>
   <br />
   <img id="photo" src="" style="border: 1px blue solid;">
 
@@ -83,6 +88,7 @@
     const imageUrl = photo.src;
 
     console.log('====== start ask ======');
+    divExplain.innerText = '-- start explain --'
     const response = await askAboutImage(imageUrl);
 
     console.log('====== answer ======');
@@ -127,24 +133,31 @@
   // --- initalize option ---
   function buildInitOptions() {
     const options = {};
-    if (API_URL && API_URL.length > 0) {
-      options.url = API_URL;
-    }
-    if (MODEL_NAME && MODEL_NAME.length > 0) {
-      options.model = MODEL_NAME;
-    }
-    if (SEND_TOKEN_LIMIT && SEND_TOKEN_LIMIT > 0) {
-      options.sendTokenLimt = SEND_TOKEN_LIMIT;
-    }
+    // if (API_URL && API_URL.length > 0) {
+    //   options.url = API_URL;
+    // }
+    // if (MODEL_NAME && MODEL_NAME.length > 0) {
+    //   options.model = MODEL_NAME;
+    // }
+    // if (SEND_TOKEN_LIMIT && SEND_TOKEN_LIMIT > 0) {
+    //   options.sendTokenLimt = SEND_TOKEN_LIMIT;
+    // }
+
+    // options.url = '';
+    options.model = 'gpt-4-vision-preview';
+    options.sendTokenLimt = 7000;
 
     return options;
   }
 
 
+  // --- get API key from URL --
+  const apiKey = getParamFromQueryString('key');
+
   // --- init Gpt context ---
   const options = buildInitOptions();
   //console.log('option for INIT:', options)
-  gptCtx = initChat(API_KEY, options); // Chatを初期化し、GPTコンテキストを保持する
+  gptCtx = initChat(apiKey, options); // Chatを初期化し、GPTコンテキストを保持する
 
 
 </script>
