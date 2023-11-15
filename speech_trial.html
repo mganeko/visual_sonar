@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width">
   <title>Speech</title>
   <script src="js/config.js"></script>
+  <script src="js/speech_api.js"></script>
 </head>
 
 <body>
@@ -21,7 +22,13 @@
 
   async function speakTest() {
     const text = "本日は晴天なり";
-    await speech(text);
+    //await speech(text);
+
+    const apiKey = API_KEY;
+    const responseBlob = await textToSpeech(text, apiKey);
+    if (responseBlob) {
+      await playbacBlobAsync(playbackAudio, responseBlob);
+    }
   }
 
   async function speech(text) {
@@ -92,6 +99,7 @@
     await playbackAudio.play();
   }
 
+  /*
   async function playbacBlobAsync(blob) {
     const blobUrl = URL.createObjectURL(blob);
     playbackAudio.src = blobUrl;
@@ -107,6 +115,7 @@
     };
     await playbackAudio.play();
   }
+  */
 
   /*--
   curl https://api.openai.com/v1/audio/speech \

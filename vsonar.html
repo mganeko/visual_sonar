@@ -4,10 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width">
-  <title>背面カメラ</title>
+  <title>V-Soner</title>
   <script src="js/config.js"></script>
   <script src="js/chat_vision_api.js"></script>
   <script src="js/ui_helper.js"></script>
+  <script src="js/speech_api.js"></script>
 </head>
 
 <body>
@@ -23,7 +24,9 @@
   &nbsp;&nbsp;
   <button id="take_photo_button" onclick="takePhoto()">Take Photo</button>
   &nbsp;
-  <button id="explaine_image_button" onclick="explainImage()">Explain</button>
+  <button id="explain_image_button" onclick="explainImage()">Explain</button>
+  &nbsp;
+  <button id="explain_voice_button" onclick="explainInVoice()">Voice</button>
   <br />
 
   <!--
@@ -34,6 +37,8 @@
   <br />
   <div id="explain_result" style="border: 1px gray solid; width:320px; height:240px; font-size: small;"></div>
   <br />
+  <audio id="playback_audio"></audio>
+  <br />
   <img id="photo" src="" style="border: 1px blue solid;">
 
 
@@ -42,6 +47,8 @@
   const localVideo = document.querySelector('video');
   const photo = document.getElementById('photo');
   const divExplain = document.getElementById('explain_result');
+  const playbackAudio = document.getElementById('playback_audio');
+
   let localStream = null;
   let workCanvas = null;
   let workCtx = null;
@@ -96,6 +103,15 @@
     divExplain.innerText = response.content;
   }
 
+  async function explainInVoice() {
+    const text = divExplain.innerText;
+
+    const responseBlob = await textToSpeech(text, apiKey);
+    if (responseBlob) {
+      await playbacBlobAsync(playbackAudio, responseBlob);
+    }
+  }
+
   function getBase64Image(video) {
     // New Canvas
     if (!workCanvas) {
@@ -129,6 +145,7 @@
 
     return response;
   }
+
 
   // --- initalize option ---
   function buildInitOptions() {
