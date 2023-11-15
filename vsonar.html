@@ -18,7 +18,7 @@
   &nbsp;&nbsp;
   <button id="take_photo_button" onclick="takePhoto()">Take Photo</button>
   &nbsp;
-  <button id="explaine_image_button" onclick="explaineImage()">Explain</button>
+  <button id="explaine_image_button" onclick="explainImage()">Explain</button>
   <br />
 
   <!--
@@ -27,14 +27,20 @@
   <video width="640" height="960" autoplay playsinline
     style="border: 1px gray solid; width:320px; height: 480px;"></video>
   <br />
-  <img id="photo" src="" style="border: 1px blue solid; width:320px; height: 480px;">
+  <div id="explain_result" style="border: 1px gray solid; width:320px; height:240px;"></div>
+  <br />
+  <img id="photo" src="" style="border: 1px blue solid;">
 
 
 </body>
 <script>
   const localVideo = document.querySelector('video');
   const photo = document.getElementById('photo');
+  const divExplain = document.getElementById('explain_result');
   let localStream = null;
+  let workCanvas = null;
+  let workCtx = null;
+
   async function startCamera() {
     try {
       const constraints = {
@@ -73,7 +79,7 @@
     photo.src = dataURI;
   }
 
-  async function explaineImage() {
+  async function explainImage() {
     const imageUrl = photo.src;
 
     console.log('====== start ask ======');
@@ -81,22 +87,24 @@
 
     console.log('====== answer ======');
     console.log(response.content);
+    divExplain.innerText = response.content;
   }
 
   function getBase64Image(video) {
     // New Canvas
-    var canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    var ctx = canvas.getContext("2d");
+    if (!workCanvas) {
+      //workCanvas = new OffscreenCanvas(video.videoWidth, video.videoHeight); // toDataUrl() not exist
+      workCanvas = document.createElement("canvas");
+      workCanvas.width = video.videoWidth;
+      workCanvas.height = video.videoHeight;
+      workCtx = workCanvas.getContext("2d");
+    }
 
     // Draw Image
-    ctx.drawImage(video, 0, 0);
-
-    // TODO: use offlineCanvas
+    workCtx.drawImage(video, 0, 0);
 
     // To Base64
-    return canvas.toDataURL("image/jpeg");
+    return workCanvas.toDataURL("image/jpeg");
 
     // result
     // data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QB ... +JN3Z6fJ5jtYIskjTqWnRm5WNkb7qHndQB//9k=
