@@ -13,17 +13,16 @@
 
 <body>
   <h1>Visual Sonar</h1>
-  <p>背面カメラの映像を表示して、内容を説明します</p>
-  <!--
-  api key <input type="text" id="api_key_input" /><br />
-  -->
-
-  <button id="start_button" onclick="startCamera()">Start</button>
-  &nbsp;
-  <button id="stop_button" onclick="stopCamera()">Stop</button>
-  &nbsp;&nbsp;
-  <button id="photo_voice_button" onclick="takePhotoAndExplainInVoice()">Explain in Voiceo</button>
-  <br />
+  <p>背面カメラの映像を表示して、内容を説明します<br />
+  api key <input type="text" size="20" id="api_key_input" />
+  </p>
+  <div>
+    <button id="start_button" style="font-size: large;" onclick="startCamera()">Start</button>
+    &nbsp;
+    <button id="stop_button" style="font-size: large;"  onclick="stopCamera()">Stop</button>
+    &nbsp;&nbsp;
+    <button id="photo_voice_button" style="font-size: large;"  onclick="takePhotoAndExplainInVoice()">Explain in Voiceo</button>
+  </div>
   <button id="take_photo_button" onclick="takePhoto()">Take Photo</button>
   &nbsp;
   <button id="explain_image_button" onclick="explainImage()">Explain</button>
@@ -54,6 +53,28 @@
   let localStream = null;
   let workCanvas = null;
   let workCtx = null;
+
+  function setKeyInput(key) {
+    const keyInput = document.getElementById('api_key_input');
+    keyInput.value = key;
+  }
+
+  function getApiKey() {
+    const keyInput = document.getElementById('api_key_input');
+    return keyInput.value;
+  }
+
+  function preapreChat() {
+    if (!gptCtx) {
+      // ---- disable api key input ---
+      disableElementById('api_key_input');
+      
+      // --- init Gpt context ---
+      const apiKey = getApiKey();
+      const options = buildInitOptions();
+      gptCtx = initChat(apiKey, options); // Chatを初期化し、GPTコンテキストを保持する
+    }
+  }
 
   async function startCamera() {
     try {
@@ -98,6 +119,7 @@
     const imageUrl = photo.src;
 
     console.log('====== start ask ======');
+    preapreChat();
     //divExplain.innerText = '-- start explain --'
     divExplain.innerText = '--start-- ' + imageUrl.substr(0, 30);
     const response = await askAboutImage(imageUrl);
@@ -112,6 +134,7 @@
     const text = divExplain.innerText;
     disableElementById('explain_voice_button');
 
+    const apiKey = getApiKey();
     const responseBlob = await textToSpeech(text, apiKey);
     if (responseBlob) {
       await playbacBlobAsync(playbackAudio, responseBlob);
@@ -184,12 +207,13 @@
 
 
   // --- get API key from URL --
-  const apiKey = getParamFromQueryString('key');
+  const queryKey = getParamFromQueryString('key');
+  setKeyInput(queryKey);
 
   // --- init Gpt context ---
-  const options = buildInitOptions();
-  //console.log('option for INIT:', options)
-  gptCtx = initChat(apiKey, options); // Chatを初期化し、GPTコンテキストを保持する
+  // const options = buildInitOptions();
+  // //console.log('option for INIT:', options)
+  // gptCtx = initChat(apiKey, options); // Chatを初期化し、GPTコンテキストを保持する
 
 
 </script>

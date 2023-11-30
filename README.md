@@ -35,7 +35,7 @@
   - [ ] 履歴を扱う、multipleChatWithImage() 関数を用意
 - [ ] api key
   - [x] QueryStringから取得
-  - [ ] inputから取得
+  - [x] inputから取得
 - [ ] UI改善
   - [ ] ボタン制御
   - [x] [Explain in Voice]ボタンで、写真->解析->発声 まで
