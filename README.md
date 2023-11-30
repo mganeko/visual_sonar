@@ -34,8 +34,11 @@
   - [x] image URL with Base64
   - [ ] 履歴を扱う、multipleChatWithImage() 関数を用意
 - [ ] api key
-  - [ ] QueryStringから取得
+  - [x] QueryStringから取得
   - [ ] inputから取得
+- [ ] UI改善
+  - [ ] ボタン制御
+  - [x] [Explain in Voice]ボタンで、写真->解析->発声 まで
 - [ ] ログ出力
   - [ ] 画面に出す  
 - [ ] 音声出力(tts)
