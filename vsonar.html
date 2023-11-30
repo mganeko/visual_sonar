@@ -68,11 +68,29 @@
     if (!gptCtx) {
       // ---- disable api key input ---
       disableElementById('api_key_input');
-      
+
       // --- init Gpt context ---
       const apiKey = getApiKey();
       const options = buildInitOptions();
       gptCtx = initChat(apiKey, options); // Chatを初期化し、GPTコンテキストを保持する
+    }
+  }
+
+  function updateUI() {
+    if (localStream) {
+      enableElementById('stop_button');
+      disableElementById('start_button');
+      enableElementById('take_photo_button');
+      enableElementById('explain_image_button');
+      enableElementById('explain_voice_button');
+      enableElementById('photo_voice_button');
+    } else {
+      disableElementById('stop_button');
+      enableElementById('start_button');
+      disableElementById('take_photo_button');
+      disableElementById('explain_image_button');
+      disableElementById('explain_voice_button');
+      disableElementById('photo_voice_button');
     }
   }
 
@@ -87,6 +105,7 @@
 
       // カメラの映像を取得
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      localStream = stream;
 
       // <video> エレメントにストリームを設定
       localVideo.srcObject = stream;
@@ -94,6 +113,7 @@
     } catch (error) {
       console.error('カメラのアクセスに失敗しました:', error);
     }
+    updateUI();
   }
 
   function stopCamera() {
@@ -103,7 +123,9 @@
         track.stop();
       });
       localVideo.srcObject = null;
+      localStream = null;
     }
+    updateUI();
   }
 
   function takePhoto() {
@@ -215,7 +237,9 @@
   // //console.log('option for INIT:', options)
   // gptCtx = initChat(apiKey, options); // Chatを初期化し、GPTコンテキストを保持する
 
-
+  // --- update UI ---
+  updateUI();
+  
 </script>
 
 </html>
