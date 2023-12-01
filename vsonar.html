@@ -27,6 +27,8 @@
   &nbsp;
   <button id="explain_image_button" onclick="explainImage()">Explain</button>
   &nbsp;
+  <button id="read_text_button" onclick="readTextOfImage()">Read Text</button>
+  &nbsp;
   <button id="explain_voice_button" onclick="explainInVoice()">Voice</button>
   <br />
 
@@ -170,6 +172,30 @@
     }
   }
 
+  async function readTextOfImage() {
+    disableElementById('read_text_button');
+    const imageUrl = photo.src;
+
+    try {
+      console.log('====== start ask ======');
+      preapreChat();
+      //divExplain.innerText = '-- start explain --'
+      clearLog()
+      showLog('--read text-- ' + imageUrl.substr(0, 30));
+      const response = await detectTextOfImgae(imageUrl);
+
+      console.log('====== answer ======');
+      clearLog()
+      showLog(response.content);
+    }
+    catch (error) {
+      showLog('error:' + error);
+    }
+    finally {
+      enableElementById('read_text_button');
+    }
+  }
+
   async function explainInVoice() {
     const text = divExplain.innerText;
     disableElementById('explain_voice_button');
@@ -239,6 +265,17 @@
     return response;
   }
 
+  async function detectTextOfImgae(imageUrl) {
+    // --- send image to GPT ---
+    //const text = 'What is this? Please answer in Japanese.';
+    //const text = 'この画像に何が写っているか、目が不自由な人向けに詳しく教えてください。'
+    const text = 'この画像に写っている文字を読み取ってください。アルファベットは英語で、漢字は日本語で読み取ってください。数字は数字のまま取り出してください'
+    const options = { temperature: 0, max_tokens: 1000 };
+    const response = await singleChatWithImage(imageUrl, text, gptCtx, options);
+
+    return response;
+  }
+
 
   // --- initalize option ---
   function buildInitOptions() {
@@ -272,7 +309,7 @@
 
   // --- update UI ---
   updateUI();
-  
+
 </script>
 
 </html>
