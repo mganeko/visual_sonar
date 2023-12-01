@@ -94,6 +94,15 @@
     }
   }
 
+  function clearLog() {
+    divExplain.innerText = '';
+  }
+
+  function showLog(str) {
+    console.log(str);
+    divExplain.innerText += (str + '\n');;
+  }
+
   async function startCamera() {
     try {
       const constraints = {
@@ -111,7 +120,8 @@
       localVideo.srcObject = stream;
       await localVideo.play();
     } catch (error) {
-      console.error('カメラのアクセスに失敗しました:', error);
+      //console.error('カメラのアクセスに失敗しました:', error);
+      showLog('カメラのアクセスに失敗しました:' + error)
     }
     updateUI();
   }
@@ -140,36 +150,59 @@
     disableElementById('explain_image_button');
     const imageUrl = photo.src;
 
-    console.log('====== start ask ======');
-    preapreChat();
-    //divExplain.innerText = '-- start explain --'
-    divExplain.innerText = '--start-- ' + imageUrl.substr(0, 30);
-    const response = await askAboutImage(imageUrl);
+    try {
+      console.log('====== start ask ======');
+      preapreChat();
+      //divExplain.innerText = '-- start explain --'
+      clearLog()
+      showLog('--start-- ' + imageUrl.substr(0, 30));
+      const response = await askAboutImage(imageUrl);
 
-    console.log('====== answer ======');
-    console.log(response.content);
-    divExplain.innerText = response.content;
-    enableElementById('explain_image_button');
+      console.log('====== answer ======');
+      clearLog()
+      showLog(response.content);
+    }
+    catch (error) {
+      showLog('error:' + error);
+    }
+    finally {
+      enableElementById('explain_image_button');
+    }
   }
 
   async function explainInVoice() {
     const text = divExplain.innerText;
     disableElementById('explain_voice_button');
 
-    const apiKey = getApiKey();
-    const responseBlob = await textToSpeech(text, apiKey);
-    if (responseBlob) {
-      await playbacBlobAsync(playbackAudio, responseBlob);
+    try {
+      const apiKey = getApiKey();
+      const responseBlob = await textToSpeech(text, apiKey);
+      if (responseBlob) {
+        await playbacBlobAsync(playbackAudio, responseBlob);
+      }
+      else {
+        divExplain.innerText += '\n\n-- TTS Error --';
+      }
     }
-    enableElementById('explain_voice_button');
+    catch (error) {
+      showLog('TTS error:' + error);
+    }
+    finally {    
+      enableElementById('explain_voice_button');
+    }
   }
 
   async function takePhotoAndExplainInVoice() {
     disableElementById('photo_voice_button');
-    await takePhoto();
-    await explainImage();
-    await explainInVoice();
-    enableElementById('photo_voice_button');
+    try {
+      await takePhoto();
+      await explainImage();
+      await explainInVoice();
+    }
+    finally
+    {
+      enableElementById('photo_voice_button');
+    }
   }
 
   function getBase64Image(video) {

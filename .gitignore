@@ -1,3 +1,4 @@
 js/config.js
 stock/
 tmp/
+.DS_Store
