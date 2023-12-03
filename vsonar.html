@@ -27,9 +27,9 @@
   &nbsp;
   <button id="explain_image_button" onclick="explainImage()">Explain</button>
   &nbsp;
-  <button id="read_text_button" onclick="readTextOfImage()">Read Text</button>
-  &nbsp;
   <button id="explain_voice_button" onclick="explainInVoice()">Voice</button>
+  &nbsp;
+  <button id="read_text_button" onclick="readTextOfImageAndExplainInVoice()">Read Text with Voice</button>
   <br />
 
   <!--
@@ -185,7 +185,8 @@
       showLog('--read text-- ' + imageUrl.substr(0, 30));
       const text = 'この画像に写っている文字を読み取ってください。アルファベットは英語で、漢字は日本語で読み取ってください。数字は数字のまま取り出してください'
       //const response = await detectTextOfImgae(imageUrl);
-      const response = await askAboutImage(imageUrl, text);
+      //const response = await askAboutImage(imageUrl, text);
+      const response = await continueChatWithLastImage(text);
 
       console.log('====== answer ======');
       clearLog()
@@ -234,6 +235,18 @@
     }
   }
 
+  async function readTextOfImageAndExplainInVoice() {
+    disableElementById('read_text_button');
+    try {
+      await readTextOfImage();
+      await explainInVoice();
+    }
+    finally
+    {
+      enableElementById('read_text_button');
+    }
+  }
+
   function getBase64Image(video) {
     // New Canvas
     if (!workCanvas) {
@@ -263,8 +276,15 @@
     //const text = 'What is this? Please answer in Japanese.';
     //const text = 'この画像に何が写っているか、目が不自由な人向けに詳しく教えてください。'
     const options = { temperature: 0, max_tokens: 1000 };
-    const response = await singleChatWithImage(imageUrl, prompt, gptCtx, options);
+    //const response = await singleChatWithImage(imageUrl, prompt, gptCtx, options);
+    const response = await beginMultiChatWithImage(imageUrl, prompt, gptCtx, options);
 
+    return response;
+  }
+
+  async function continueChatWithLastImage(prompt) {
+    const options = { temperature: 0, max_tokens: 1000 };
+    const response = await postChatText(prompt, gptCtx, options);
     return response;
   }
 

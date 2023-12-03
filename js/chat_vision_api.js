@@ -146,7 +146,7 @@ async function postChatText(text, ctx, options) {
 * @param {object} ctx - GPTコンテキスト
 * @param {object} options - オプション(null可)。{ temperature: xxxx, max_tokens: xxxx } のみ有効
 * @returns {object} 応答 - { role: 'assistant' / 'error', content: 生成されたテキスト }
-* @example postChatText('世界で一番高い山は？, ctx); // returns { role: 'assistant', content: 'エベレスト'}
+* @example singleChatWithImage(url, 'この山の名前は？', ctx); // returns { role: 'assistant', content: '富士山'}
 */
 async function singleChatWithImage(image_url, text, ctx, options) {
   const userMessage = {
@@ -168,6 +168,61 @@ async function singleChatWithImage(image_url, text, ctx, options) {
   // -- request --
   const response = await _chatCompletion([userMessage], ctx.apiKey, ctx.model, ctx.url, options);
   _debugLog(response);
+
+  return response;
+}
+
+/*
+ * 画像とテキストで連続のチャットを行うチャットメッセージを送信する
+ */
+/**
+* これまでの履歴をクリアしてから、画像のURLを送信しチャットを開始し、応答を返す。履歴を新たに保持する
+* @description ctx.chat_messages にやりとりを蓄積する。同じ画像について継続する場合は、postChatText()を利用する
+* @param {string} image_url - 画像のURL
+* @param {string} text - ユーザーからのテキスト
+* @param {object} ctx - GPTコンテキスト
+* @param {object} options - オプション(null可)。{ temperature: xxxx, max_tokens: xxxx } のみ有効
+* @returns {object} 応答 - { role: 'assistant' / 'error', content: 生成されたテキスト }
+* @example beginMultiChatWithImage(url, 'この山の名前は？', ctx); // returns { role: 'assistant', content: '富士山'}
+*/
+async function beginMultiChatWithImage(image_url, text, ctx, options) {
+  const userMessage = {
+    role: 'user',
+    content: [
+      {
+        "type": "text",
+        "text": text,
+      },
+      {
+        "type": "image_url",
+        "image_url": {
+          "url": image_url,
+        }
+      }
+    ]
+  };
+
+  // ==== 履歴をクリアする ===
+  clearChatHistory(ctx);
+  
+  // ==== 一時的メッセージ配列を作る ===
+  const tempMessages = Array.from(ctx.chat_messages);
+  tempMessages.push(userMessage);
+  
+  // -- compaction --
+  // TODO: 適切な compaction を実装する
+
+
+  // -- request --
+  const response = await _chatCompletion(tempMessages, ctx.apiKey, ctx.model, ctx.url, options);
+  _debugLog(response);
+
+  // --- 結果が正常な場合に、userメッセージと合わせて保持する  --
+  if (response.role === 'assistant') {
+    tempMessages.push(response);
+    ctx.chat_messages = tempMessages; // コンテキストのチャット履歴を置き換える
+  }
+  _debugLog('after response, messages:', ctx.chat_messages);
 
   return response;
 }
