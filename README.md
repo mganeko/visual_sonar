@@ -33,6 +33,12 @@
   - [x] image URL ... public URL
   - [x] image URL with Base64
   - [ ] 履歴を扱う、multipleChatWithImage() 関数を用意
+- [ ] 解析パターンを追加
+  - [x] 普通に説明
+  - [ ] 詳細に説明
+  - [ ] もっと詳しく説明（履歴あり）
+  - [x] 商品ラベル等の文字の読み上げ
+  - [ ] 歩く際の障害物を検知
 - [ ] api key
   - [x] QueryStringから取得
   - [x] inputから取得
@@ -41,9 +47,9 @@
   - [x] [Explain in Voice]ボタンで、写真->解析->発声 まで
 - [ ] ログ出力
   - [ ] 画面に出す  
-- [ ] 音声出力(tts)
+- [x] 音声出力(tts)
   - [x] ttsのテスト
-  - [ ] 取得内容を音声でプレイバック
+  - [x] 取得内容を音声でプレイバック
 - [ ] 音声入力
   - [ ] speech API
   - [ ] or getUserMedia()
