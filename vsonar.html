@@ -55,6 +55,7 @@
   let localStream = null;
   let workCanvas = null;
   let workCtx = null;
+  let hasExplain = false;
 
   function setKeyInput(key) {
     const keyInput = document.getElementById('api_key_input');
@@ -80,21 +81,49 @@
   }
 
   function updateUI() {
-    if (localStream) {
+    if (isCameraStarted()) {
       enableElementById('stop_button');
       disableElementById('start_button');
       enableElementById('take_photo_button');
-      enableElementById('explain_image_button');
-      enableElementById('explain_voice_button');
       enableElementById('photo_voice_button');
+
+      if (hasCapburedImage()) {
+        enableElementById('explain_image_button');
+      }
+      else {
+        disableElementById('explain_image_button');
+      }
+
+      if (hasExplainText()) {
+        enableElementById('read_text_button');
+        enableElementById('explain_voice_button');
+      }
+      else {
+        disableElementById('read_text_button');
+        disableElementById('explain_voice_button');
+      }
     } else {
       disableElementById('stop_button');
       enableElementById('start_button');
       disableElementById('take_photo_button');
       disableElementById('explain_image_button');
+      disableElementById('read_text_button');
       disableElementById('explain_voice_button');
       disableElementById('photo_voice_button');
     }
+  }
+
+  function isCameraStarted() {
+    return (localStream !== null);
+  }
+
+  function hasCapburedImage() {
+    const imageHeader = 'data:image/jpeg;base64,';
+    return (photo.src  && (photo.src.substring(0, imageHeader.length) == imageHeader));
+  }
+
+  function hasExplainText() {
+    return hasExplain;
   }
 
   function clearLog() {
@@ -147,6 +176,9 @@
     photo.width = localVideo.videoWidth;
     photo.height = localVideo.videoHeight;
     photo.src = dataURI;
+
+    hasExplain = false;
+    updateUI();
   }
 
   async function explainImage() {
@@ -163,12 +195,14 @@
       console.log('====== answer ======');
       clearLog()
       showLog(response.content);
+      hasExplain = true;
     }
     catch (error) {
       showLog('error:' + error);
     }
     finally {
       enableElementById('explain_image_button');
+      updateUI();
     }
   }
 
