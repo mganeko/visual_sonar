@@ -136,6 +136,8 @@
   }
 
   async function startCamera() {
+    preparePlay(playbackAudio);
+
     try {
       const constraints = {
         video: {

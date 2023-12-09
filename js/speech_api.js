@@ -82,6 +82,21 @@ async function playbacBlobAsync(audioElement, blob) {
   await audioElement.play();
 }
 
+/*
+ * audio要素の再生を準備する（クリックイベントで呼び出し、再生の準備をする）
+ */
+/**
+ * audio要素の再生を準備する（クリックイベントで呼び出し、再生の準備をする）
+ * @description audio要素の再生を準備する（クリックイベントで呼び出し、再生の準備をする）
+ * @param {element} audioElement - オーディオ要素
+ * @returns {none} なし
+ * @example preparePlay(audio)
+ */
+function preparePlay(audioElement) {
+  audioElement.play().catch(err => { _speechDebugLog(err); });
+  audioElement.pause();
+}
+
 // ======= inner variable =========
 const _speechDebugMode = true; // true / false
 
