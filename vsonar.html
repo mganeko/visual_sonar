@@ -14,14 +14,15 @@
 <body>
   <h1>Visual Sonar</h1>
   <p>背面カメラの映像を表示して、内容を説明します<br />
-  api key <input type="text" size="20" id="api_key_input" />
+    api key <input type="text" size="20" id="api_key_input" />
   </p>
   <div>
     <button id="start_button" style="font-size: large;" onclick="startCamera()">Start</button>
     &nbsp;
-    <button id="stop_button" style="font-size: large;"  onclick="stopCamera()">Stop</button>
+    <button id="stop_button" style="font-size: large;" onclick="stopCamera()">Stop</button>
     &nbsp;&nbsp;
-    <button id="photo_voice_button" style="font-size: large;"  onclick="takePhotoAndExplainInVoice()">Explain in Voiceo</button>
+    <button id="photo_voice_button" style="font-size: large;" onclick="takePhotoAndExplainInVoice()">Explain in
+      Voiceo</button>
   </div>
   <button id="take_photo_button" onclick="takePhoto()">Take Photo</button>
   &nbsp;
@@ -55,7 +56,7 @@
   let localStream = null;
   let workCanvas = null;
   let workCtx = null;
-  let hasExplain = false;
+
 
   function setKeyInput(key) {
     const keyInput = document.getElementById('api_key_input');
@@ -85,7 +86,6 @@
       enableElementById('stop_button');
       disableElementById('start_button');
       enableElementById('take_photo_button');
-      enableElementById('photo_voice_button');
 
       if (hasCapburedImage()) {
         enableElementById('explain_image_button');
@@ -94,13 +94,22 @@
         disableElementById('explain_image_button');
       }
 
-      if (hasExplainText()) {
+      // -- voice button --
+      if (hasExplainText() && (!isWaitingForExplain()) && (!isWaitingForVoice())) {
         enableElementById('read_text_button');
         enableElementById('explain_voice_button');
       }
       else {
         disableElementById('read_text_button');
         disableElementById('explain_voice_button');
+      }
+
+      // --- photo and voice button
+      if ((!isWaitingForExplain()) && (!isWaitingForVoice())) {
+        enableElementById('photo_voice_button');
+      }
+      else {
+        disableElementById('photo_voice_button');
       }
     } else {
       disableElementById('stop_button');
@@ -119,11 +128,23 @@
 
   function hasCapburedImage() {
     const imageHeader = 'data:image/jpeg;base64,';
-    return (photo.src  && (photo.src.substring(0, imageHeader.length) == imageHeader));
+    return (photo.src && (photo.src.substring(0, imageHeader.length) == imageHeader));
   }
+
+  let isWaitingForExplainImage = false;
+  let isWaitingForTTS = false;
+  let hasExplain = false;
 
   function hasExplainText() {
     return hasExplain;
+  }
+
+  function isWaitingForExplain() {
+    return isWaitingForExplainImage
+  }
+
+  function isWaitingForVoice() {
+    return isWaitingForTTS;
   }
 
   function clearLog() {
@@ -184,7 +205,11 @@
   }
 
   async function explainImage() {
+    isWaitingForExplainImage = true;
+    disableElementById('explain_voice_button');
     disableElementById('explain_image_button');
+    disableElementById('read_text_button');
+    disableElementById('photo_voice_button');
     const imageUrl = photo.src;
 
     try {
@@ -203,13 +228,19 @@
       showLog('error:' + error);
     }
     finally {
-      enableElementById('explain_image_button');
+      isWaitingForExplainImage = false;
+      //enableElementById('explain_image_button');
+      //enableElementById('read_text_button');
+
       updateUI();
     }
   }
 
   async function readTextOfImage() {
-    disableElementById('read_text_button');
+    //disableElementById('read_text_button');
+    //disableElementById('photo_voice_button');
+    disableElementById('explain_image_button');
+    disableElementById('explain_voice_button');
     const imageUrl = photo.src;
 
     try {
@@ -229,13 +260,20 @@
       showLog('error:' + error);
     }
     finally {
-      enableElementById('read_text_button');
+      isWaitingForExplainImage = false;
+
+      //enableElementById('explain_image_button');
+      //enableElementById('explain_voice_button');
+      updateUI();
     }
   }
 
   async function explainInVoice() {
+    isWaitingForTTS = true;
     const text = divExplain.innerText;
     disableElementById('explain_voice_button');
+    disableElementById('read_text_button');
+    disableElementById('photo_voice_button');
 
     try {
       const apiKey = getApiKey();
@@ -250,33 +288,44 @@
     catch (error) {
       showLog('TTS error:' + error);
     }
-    finally {    
-      enableElementById('explain_voice_button');
+    finally {
+      isWaitingForTTS = false;
+      //enableElementById('explain_voice_button');
+      updateUI();
+
     }
   }
 
   async function takePhotoAndExplainInVoice() {
+    isWaitingForTTS = true;
+    isWaitingForExplainImage = true;
     disableElementById('photo_voice_button');
+    disableElementById('read_text_button');
     try {
       await takePhoto();
       await explainImage();
       await explainInVoice();
     }
-    finally
-    {
-      enableElementById('photo_voice_button');
+    finally {
+      //enableElementById('photo_voice_button');
+      //enableElementById('read_text_button');
+      updateUI();
     }
   }
 
   async function readTextOfImageAndExplainInVoice() {
+    isWaitingForTTS = true;
+    isWaitingForExplainImage = true;
     disableElementById('read_text_button');
+    disableElementById('photo_voice_button');
     try {
       await readTextOfImage();
       await explainInVoice();
     }
-    finally
-    {
-      enableElementById('read_text_button');
+    finally {
+      //enableElementById('read_text_button');
+      //enableElementById('photo_voice_button');
+      updateUI();
     }
   }
 
