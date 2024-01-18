@@ -6,21 +6,45 @@
 - カメラで周囲の様子を定期的に撮影
 - GPT4-Vで、様子を解析
 - 音声合成で、ユーザーに伝える
-- アクセシビリティに配慮。音声で操作できるのが理想
-- 画像について、音声入力で細かい様子を質問できるようにしたい
-- 質問 or 次の撮影にすすむかを、音声で制御(Functin Calling?)
+- 今後やりたいこと
+  - アクセシビリティに配慮。音声で操作できるのが理想
+  - 画像について、音声入力で細かい様子を質問できるようにしたい
+  - 質問 or 次の撮影にすすむかを、音声で制御(Functin Calling?)
+
+# 使い方
+
+- [vsonar.html](https://mganeko.github.io/visual_sonar/vsonar.html)をブラウザで表示
+- [api key]に、OpenAIのAPIキーを指定
+  - または、vsonar.html?key=xxxxxx とURLのクエリーパラメータに指定してもOK
+- [Start]ボタンをクリック
+  - カメラの許可を求められらた、許可する
+  - カメラの映像が表示される
+- [Explain in Voice]ボタンをクリック
+  - 映像から画面を切り抜き
+  - OpenAIの GPT-4 Vで画面を解析
+  - TTSで音声に変換、それを再生して画像の説明をする
+- [Stop]ボタンをクリックすると、カメラの映像が停止
 
 # page
 
+Visual Sonnar
+
+- [vsonar](vsonar.html)
+
+実験ページ
+
 - [backcam.html](backcam.html)
 - [vision_trial](vision_trial.html)
-- [vsonar](vsonar.html)
 - [speech_trial](speech_trial.html)
+
+# ライセンス/License
+
+MIT
 
 # TODO
 
 - [ ] スマホブラウザで動作
-  - [ ] iPhone Safari
+  - [x] iPhone Safari
   - [ ] Andorid Chrome
 - [x] 背面カメラの映像を取得
   - [x] mediadevices.getUserMedia()
