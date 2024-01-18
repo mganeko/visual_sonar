@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>VAD</title>
+
+</head>
+<!--
+  https://zenn.dev/temori/articles/b37e4ab94a355b
+  https://github.com/ricky0123/vad
+-->
+
+<body>
+  <h2>VAD test</h2>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.7/dist/bundle.min.js"></script>
+<script>
+  async function main() {
+    const myvad = await vad.MicVAD.new({
+      onSpeechStart: () => {
+        console.log("Speech start detected")
+      },
+      onSpeechEnd: (audio) => {
+        // do something with `audio` (Float32Array of audio samples at sample rate 16000)...
+        console.log(audio.length)
+      }
+    })
+    myvad.start()
+  }
+  main()
+</script>
+
+</html>
