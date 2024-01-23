@@ -12,11 +12,17 @@
 
 <body>
   <h2>VAD test</h2>
+  <button onclick="start()">Start</button>
+  &nbsp;
+  <button onclick="pause()">Pause</button>
+  &nbsp;&nbsp;
+  <button onclick="stop()">Stop</button>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.7/dist/bundle.min.js"></script>
 <script>
-  async function main() {
+  let vadObj = null;
+  async function prepareVad() {
     const myvad = await vad.MicVAD.new({
       onSpeechStart: () => {
         console.log("Speech start detected")
@@ -26,9 +32,40 @@
         console.log(audio.length)
       }
     })
-    myvad.start()
+    //myvad.start()
+    return myvad;
   }
-  main()
+  // main().then((v) => {
+  //   console.log("vad ready")
+  //   vadObj = v;
+  // })
+
+  async function start() {
+    if (! vadObj) {
+      vadObj = await prepareVad();
+    }
+    vadObj.start();
+    console.log("vad start")
+  }
+
+  function pause() {
+    if (vadObj) {
+      vadObj.pause();
+      console.log("vad pause")
+    }
+  }
+
+  function stop() {
+    if (vadObj) {
+      vadObj.pause();
+      //vadObj.destroy();
+      vadObj.stream.getTracks().forEach(function(track) {
+        track.stop();
+      });
+      vadObj = null;
+      console.log("vad stop")
+    }
+  }
 </script>
 
 </html>
