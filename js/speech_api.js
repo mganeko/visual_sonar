@@ -56,6 +56,59 @@ async function textToSpeech(text, apiKey) {
 }
 
 /*
+ * 音声をテキストに変換する（文字起こし）
+ */
+/**
+* 音声をテキストに変換する（文字起こし）
+* @description 音声をテキストに変換する（文字起こし）
+* @param {File} file - 変換する音声ファイル
+* @param {string} apiKey - OpenAI APIのキー
+* @returns {string} テキスト
+* @example speechToText(fileobj, 'sk-xxxxxxx'); // returns text
+*/
+async function speechToText(file, apiKey) {
+  const apiUrl = 'https://api.openai.com/v1/audio/transcriptions';
+
+  // -- build header --
+  const headers = {
+    //"Content-Type": "multipart/form-data", // NOT NEED
+    Authorization: `Bearer ${apiKey}`,
+  };
+
+  // --- build body ---
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('model', 'whisper-1');
+  fd.append('language', 'ja');
+  fd.append('temperature', '0');
+  fd.append('response_format', 'json');
+  const body = fd;
+
+
+  // --- request ---
+  _speechDebugLog('start stt');
+  const res = await fetch(apiUrl, {
+    method: "POST",
+    headers: headers,
+    body,
+  }).catch(e => {
+    console.error(e);
+    return null;
+  });
+  _speechDebugLog('end stt');
+  _speechDebugLog(res);
+
+  // エラー判定
+  if (!res.ok) {
+    console.error('NOT OK;', res.status);
+    return null;
+  }
+
+  const responseJson = await res.json();
+  return responseJson.text;
+}
+
+/*
  * 音声blobを再生する
  */
 /**
