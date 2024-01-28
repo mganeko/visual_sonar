@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <title>V-Soner</title>
+  <script src="js/config.js"></script>
+  <script src="js/ui_helper.js"></script>
+  <script src="js/speech_api.js"></script>
+</head>
+
+<body>
+  <h1>TTS Tool</h1>
+  <div>
+    <textarea id="tts_text" cols="50" rows="10"></textarea>
+  </div>
+  <div>
+    <button id="tts_button">変換</button>
+  </div>
+  <div>
+    <audio id="tts_audio" controls></audio>&nbsp;
+    <a id="tts_download" href="" download="tts.mp3">Download</a>
+  </div>
+  <script>
+    const tts_text = document.getElementById('tts_text');
+    const tts_button = document.getElementById('tts_button');
+    const tts_audio = document.getElementById('tts_audio');
+    const tts_download = document.getElementById('tts_download');
+
+    tts_button.addEventListener('click', async () => {
+      if (tts_audio.src && tts_audio.src !== '') {
+        URL.revokeObjectURL(tts_audio.src);
+        tts_audio.src = '';
+        tts_download.href = '';
+      }
+      const text = tts_text.value;
+      if (text) {
+        const blob = await textToSpeech(text, API_KEY);
+        const url = URL.createObjectURL(blob);
+        tts_audio.src = url;
+        tts_download.href = url;
+      }
+    });
+  </script>
+</body>
+</html>
+
