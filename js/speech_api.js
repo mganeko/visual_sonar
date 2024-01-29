@@ -125,14 +125,29 @@ async function playbacBlobAsync(audioElement, blob) {
   audioElement.onload = (evt) => {
     _speechDebugLog('onload');
   };
-  audioElement.onerror = (err) => {
-    console.error('audio playback ERROR:', err);
-  };
-  audioElement.onended = (evt) => {
-    _speechDebugLog('playback end');
-    URL.revokeObjectURL(blobUrl);
-  };
-  await audioElement.play();
+  // audioElement.onerror = (err) => {
+  //   console.error('audio playback ERROR:', err);
+  // };
+  // audioElement.onended = (evt) => {
+  //   _speechDebugLog('playback end');
+  //   URL.revokeObjectURL(blobUrl);
+  // };
+  //await audioElement.play();
+
+  const p = new Promise((resolve, reject) => {
+    audioElement.onended = (evt) => {
+      _speechDebugLog('playback end');
+      URL.revokeObjectURL(blobUrl);
+      resolve();
+    };
+    audioElement.onerror = (err) => {
+      console.error('audio playback ERROR:', err);
+      reject(err);
+    };
+    audioElement.play();
+  });
+
+  await p;
 }
 
 /*

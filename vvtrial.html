@@ -36,7 +36,7 @@
   <br />
 
   <video width="640" height="960" autoplay playsinline
-    style="border: 1px gray solid; width:320px; height: 480px;"></video>
+    style="border: 1px gray solid; width:320px; height: 480px;" onclick="takePhotoAndExplainInVoice()"></video>
   <br />
   <div id="explain_result" style="border: 1px gray solid; width:320px; height:240px; font-size: small;"></div>
   <br />
@@ -304,14 +304,21 @@
     disableElementById('read_text_button');
     try {
       await takePhoto();
+      playbackAudioUrl(playbackAudio, 'audio/analyzing.mp3');
       await explainImage();
       await explainInVoice();
+      playbackAudioUrl(playbackAudio, 'audio/any_additional_question.mp3'); // 前の音声が終わるのを待ってくれない
     }
     finally {
       //enableElementById('photo_voice_button');
       //enableElementById('read_text_button');
       updateUI();
     }
+  }
+
+  function playbackAudioUrl(element, url) {
+    element.src = url;
+    element.play();
   }
 
   async function readTextOfImageAndExplainInVoice() {
