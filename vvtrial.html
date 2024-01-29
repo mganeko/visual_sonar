@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <title>V-Soner</title>
+  <script src="js/config.js"></script>
+  <script src="js/chat_vision_api.js"></script>
+  <script src="js/ui_helper.js"></script>
+  <script src="js/speech_api.js"></script>
+</head>
+
+<body>
+  <h1>Visual & Voice Sonar</h1>
+  <p>背面カメラの映像を表示して、内容を説明します<br />
+    api key <input type="text" size="20" id="api_key_input" />
+  </p>
+  <div>
+    <button id="start_button" style="font-size: large; width:400px; height: 400px;"
+      onclick="startCamera()">Start</button>
+    &nbsp;
+    <br />
+    <button id="stop_button" style="font-size: large;" onclick="stopCamera()">Stop</button>
+    &nbsp;&nbsp;
+    <button id="photo_voice_button" style="font-size: large;" onclick="takePhotoAndExplainInVoice()">Explain in
+      Voice</button>
+  </div>
+  <button id="take_photo_button" onclick="takePhoto()">Take Photo</button>
+  &nbsp;
+  <button id="explain_image_button" onclick="explainImage()">Explain</button>
+  &nbsp;
+  <button id="explain_voice_button" onclick="explainInVoice()">Voice</button>
+  &nbsp;
+  <button id="read_text_button" onclick="readTextOfImageAndExplainInVoice()">Read Text with Voice</button>
+  <br />
+
+  <video width="640" height="960" autoplay playsinline
+    style="border: 1px gray solid; width:320px; height: 480px;"></video>
+  <br />
+  <div id="explain_result" style="border: 1px gray solid; width:320px; height:240px; font-size: small;"></div>
+  <br />
+  <audio id="playback_audio"></audio>
+  <br />
+  <img id="photo" src="" style="border: 1px blue solid;">
+
+
+</body>
+<script>
+  const localVideo = document.querySelector('video');
+  const photo = document.getElementById('photo');
+  const divExplain = document.getElementById('explain_result');
+  const playbackAudio = document.getElementById('playback_audio');
+
+  let localStream = null;
+  let workCanvas = null;
+  let workCtx = null;
+
+
+  function setKeyInput(key) {
+    const keyInput = document.getElementById('api_key_input');
+    keyInput.value = key;
+  }
+
+  function getApiKey() {
+    const keyInput = document.getElementById('api_key_input');
+    return keyInput.value;
+  }
+
+  function prepareChatContext() {
+    if (!gptCtx) {
+      // ---- disable api key input ---
+      disableElementById('api_key_input');
+
+      // --- init Gpt context ---
+      const apiKey = getApiKey();
+      const options = buildInitOptions();
+      gptCtx = initChat(apiKey, options); // Chatを初期化し、GPTコンテキストを保持する
+    }
+    return gptCtx;
+  }
+
+  function updateUI() {
+    if (isCameraStarted()) {
+      enableElementById('stop_button');
+      disableElementById('start_button');
+      hideElementById('start_button');
+      enableElementById('take_photo_button');
+
+      if (hasCapburedImage()) {
+        enableElementById('explain_image_button');
+      }
+      else {
+        disableElementById('explain_image_button');
+      }
+
+      // -- voice button --
+      if (hasExplainText() && (!isWaitingForExplain()) && (!isWaitingForVoice())) {
+        enableElementById('read_text_button');
+        enableElementById('explain_voice_button');
+      }
+      else {
+        disableElementById('read_text_button');
+        disableElementById('explain_voice_button');
+      }
+
+      // --- photo and voice button
+      if ((!isWaitingForExplain()) && (!isWaitingForVoice())) {
+        enableElementById('photo_voice_button');
+      }
+      else {
+        disableElementById('photo_voice_button');
+      }
+    } else {
+      disableElementById('stop_button');
+      enableElementById('start_button');
+      showElementById('start_button');
+      disableElementById('take_photo_button');
+      disableElementById('explain_image_button');
+      disableElementById('read_text_button');
+      disableElementById('explain_voice_button');
+      disableElementById('photo_voice_button');
+    }
+  }
+
+  function isCameraStarted() {
+    return (localStream !== null);
+  }
+
+  function hasCapburedImage() {
+    const imageHeader = 'data:image/jpeg;base64,';
+    return (photo.src && (photo.src.substring(0, imageHeader.length) == imageHeader));
+  }
+
+  let isWaitingForExplainImage = false;
+  let isWaitingForTTS = false;
+  let hasExplain = false;
+
+  function hasExplainText() {
+    return hasExplain;
+  }
+
+  function isWaitingForExplain() {
+    return isWaitingForExplainImage
+  }
+
+  function isWaitingForVoice() {
+    return isWaitingForTTS;
+  }
+
+  function clearLog() {
+    divExplain.innerText = '';
+  }
+
+  function showLog(str) {
+    console.log(str);
+    divExplain.innerText += (str + '\n');;
+  }
+
+  async function startCamera() {
+    preparePlay(playbackAudio);
+
+    try {
+      const constraints = {
+        video: {
+          //facingMode: "user" // フロントカメラを使用
+          facingMode: "environment" // 背面カメラを使用
+        }
+      };
+
+      // カメラの映像を取得
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      localStream = stream;
+
+      // <video> エレメントにストリームを設定
+      localVideo.srcObject = stream;
+      await localVideo.play();
+    } catch (error) {
+      //console.error('カメラのアクセスに失敗しました:', error);
+      showLog('カメラのアクセスに失敗しました:' + error)
+    }
+    updateUI();
+  }
+
+  function stopCamera() {
+    if (localVideo.srcObject) {
+      localVideo.pause();
+      localVideo.srcObject.getTracks().forEach(track => {
+        track.stop();
+      });
+      localVideo.srcObject = null;
+      localStream = null;
+    }
+    updateUI();
+  }
+
+  function takePhoto() {
+    const dataURI = getBase64Image(localVideo);
+    console.log(dataURI);
+    photo.width = localVideo.videoWidth;
+    photo.height = localVideo.videoHeight;
+    photo.src = dataURI;
+
+    hasExplain = false;
+    updateUI();
+  }
+
+  async function explainImage() {
+    isWaitingForExplainImage = true;
+    disableElementById('explain_voice_button');
+    disableElementById('explain_image_button');
+    disableElementById('read_text_button');
+    disableElementById('photo_voice_button');
+    const imageUrl = photo.src;
+
+    try {
+      console.log('====== start ask ======');
+      clearLog()
+      showLog('--start-- ' + imageUrl.substr(0, 30));
+      const text = 'What is this? Please answer in Japanese.'
+      const response = await askAboutImage(imageUrl, text);
+
+      console.log('====== answer ======');
+      clearLog()
+      showLog(response.content);
+      hasExplain = true;
+    }
+    catch (error) {
+      showLog('error:' + error);
+    }
+    finally {
+      isWaitingForExplainImage = false;
+      //enableElementById('explain_image_button');
+      //enableElementById('read_text_button');
+
+      updateUI();
+    }
+  }
+
+  async function readTextOfImage() {
+    //disableElementById('read_text_button');
+    //disableElementById('photo_voice_button');
+    disableElementById('explain_image_button');
+    disableElementById('explain_voice_button');
+    const imageUrl = photo.src;
+
+    try {
+      console.log('====== start ask ======');
+      clearLog()
+      showLog('--read text-- ' + imageUrl.substr(0, 30));
+      const text = 'この画像に写っている文字を読み取ってください。アルファベットは英語で、漢字は日本語で読み取ってください。数字は数字のまま取り出してください'
+      //const response = await detectTextOfImgae(imageUrl);
+      //const response = await askAboutImage(imageUrl, text);
+      const response = await continueChatWithLastImage(text);
+
+      console.log('====== answer ======');
+      clearLog()
+      showLog(response.content);
+    }
+    catch (error) {
+      showLog('error:' + error);
+    }
+    finally {
+      isWaitingForExplainImage = false;
+
+      //enableElementById('explain_image_button');
+      //enableElementById('explain_voice_button');
+      updateUI();
+    }
+  }
+
+  async function explainInVoice() {
+    isWaitingForTTS = true;
+    const text = divExplain.innerText;
+    disableElementById('explain_voice_button');
+    disableElementById('read_text_button');
+    disableElementById('photo_voice_button');
+
+    try {
+      const apiKey = getApiKey();
+      const responseBlob = await textToSpeech(text, apiKey);
+      if (responseBlob) {
+        await playbacBlobAsync(playbackAudio, responseBlob);
+      }
+      else {
+        divExplain.innerText += '\n\n-- TTS Error --';
+      }
+    }
+    catch (error) {
+      showLog('TTS error:' + error);
+    }
+    finally {
+      isWaitingForTTS = false;
+      //enableElementById('explain_voice_button');
+      updateUI();
+
+    }
+  }
+
+  async function takePhotoAndExplainInVoice() {
+    isWaitingForTTS = true;
+    isWaitingForExplainImage = true;
+    disableElementById('photo_voice_button');
+    disableElementById('read_text_button');
+    try {
+      await takePhoto();
+      await explainImage();
+      await explainInVoice();
+    }
+    finally {
+      //enableElementById('photo_voice_button');
+      //enableElementById('read_text_button');
+      updateUI();
+    }
+  }
+
+  async function readTextOfImageAndExplainInVoice() {
+    isWaitingForTTS = true;
+    isWaitingForExplainImage = true;
+    disableElementById('read_text_button');
+    disableElementById('photo_voice_button');
+    try {
+      await readTextOfImage();
+      await explainInVoice();
+    }
+    finally {
+      //enableElementById('read_text_button');
+      //enableElementById('photo_voice_button');
+      updateUI();
+    }
+  }
+
+  function getBase64Image(video) {
+    // New Canvas
+    if (!workCanvas) {
+      //workCanvas = new OffscreenCanvas(video.videoWidth, video.videoHeight); // toDataUrl() not exist
+      workCanvas = document.createElement("canvas");
+      workCanvas.width = video.videoWidth;
+      workCanvas.height = video.videoHeight;
+      workCtx = workCanvas.getContext("2d");
+    }
+
+    // Draw Image
+    workCtx.drawImage(video, 0, 0);
+
+    // To Base64
+    return workCanvas.toDataURL("image/jpeg");
+
+    // result
+    // data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QB ... +JN3Z6fJ5jtYIskjTqWnRm5WNkb7qHndQB//9k=
+  }
+
+  // ==== global context ===
+  let gptCtx = null;
+
+  // ---- try gpt4-vision-preview ---
+  async function askAboutImage(imageUrl, prompt) {
+    // --- send image to GPT ---
+    //const text = 'What is this? Please answer in Japanese.';
+    //const text = 'この画像に何が写っているか、目が不自由な人向けに詳しく教えてください。'
+    const ctx = prepareChatContext();
+    const options = { temperature: 0, max_tokens: 1000 };
+    //const response = await singleChatWithImage(imageUrl, prompt, ctx, options);
+    const response = await beginMultiChatWithImage(imageUrl, prompt, ctx, options);
+
+    return response;
+  }
+
+  async function continueChatWithLastImage(prompt) {
+    const ctx = prepareChatContext();
+    const options = { temperature: 0, max_tokens: 1000 };
+    const response = await postChatText(prompt, ctx, options);
+    return response;
+  }
+
+  /* ---
+  async function detectTextOfImgae(imageUrl) {
+    // --- send image to GPT ---
+    //const text = 'What is this? Please answer in Japanese.';
+    //const text = 'この画像に何が写っているか、目が不自由な人向けに詳しく教えてください。'
+    const text = 'この画像に写っている文字を読み取ってください。アルファベットは英語で、漢字は日本語で読み取ってください。数字は数字のまま取り出してください'
+    const options = { temperature: 0, max_tokens: 1000 };
+    const response = await singleChatWithImage(imageUrl, text, gptCtx, options);
+
+    return response;
+  }
+  -- */
+
+
+  // --- initalize option ---
+  function buildInitOptions() {
+    const options = {};
+    // if (API_URL && API_URL.length > 0) {
+    //   options.url = API_URL;
+    // }
+    // if (MODEL_NAME && MODEL_NAME.length > 0) {
+    //   options.model = MODEL_NAME;
+    // }
+    // if (SEND_TOKEN_LIMIT && SEND_TOKEN_LIMIT > 0) {
+    //   options.sendTokenLimt = SEND_TOKEN_LIMIT;
+    // }
+
+    // options.url = '';
+    options.model = 'gpt-4-vision-preview';
+    options.sendTokenLimt = 7000;
+
+    return options;
+  }
+
+
+  // --- get API key from URL --
+  const queryKey = getParamFromQueryString('key');
+  setKeyInput(queryKey);
+
+  // --- init Gpt context ---
+  // const options = buildInitOptions();
+  // //console.log('option for INIT:', options)
+  // gptCtx = initChat(apiKey, options); // Chatを初期化し、GPTコンテキストを保持する
+
+  // --- update UI ---
+  updateUI();
+
+</script>
+
+</html>

@@ -14,6 +14,19 @@ function disableElementById(id) {
   element.disabled = true;
 }
 
+// -- hide UI element --
+function hideElementById(id) {
+  const element = document.getElementById(id);
+  element.style.display = 'none';
+}
+
+// -- show UI element --
+function showElementById(id) {
+  const element = document.getElementById(id);
+  element.style.display = 'block';
+}
+
+
 // --- get param from query string ---
 function getParamFromQueryString(key) {
   const search = window.location.search;
