@@ -9,6 +9,9 @@
   <script src="js/chat_vision_api.js"></script>
   <script src="js/ui_helper.js"></script>
   <script src="js/speech_api.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.7/dist/bundle.min.js"></script>
+
 </head>
 
 <body>
@@ -35,8 +38,8 @@
   <button id="read_text_button" onclick="readTextOfImageAndExplainInVoice()">Read Text with Voice</button>
   <br />
 
-  <video width="640" height="960" autoplay playsinline
-    style="border: 1px gray solid; width:320px; height: 480px;" onclick="takePhotoAndExplainInVoice()"></video>
+  <video width="640" height="960" autoplay playsinline style="border: 1px gray solid; width:320px; height: 480px;"
+    onclick="takePhotoAndExplainInVoice()" ondblclick="stopCamera()"></video>
   <br />
   <div id="explain_result" style="border: 1px gray solid; width:320px; height:240px; font-size: small;"></div>
   <br />
@@ -308,6 +311,7 @@
       await explainImage();
       await explainInVoice();
       playbackAudioUrl(playbackAudio, 'audio/any_additional_question.mp3'); // 前の音声が終わるのを待ってくれない
+      await startVAD();
     }
     finally {
       //enableElementById('photo_voice_button');
@@ -327,6 +331,7 @@
     disableElementById('read_text_button');
     disableElementById('photo_voice_button');
     try {
+      stopVAD();
       await readTextOfImage();
       await explainInVoice();
     }
@@ -359,6 +364,7 @@
 
   // ==== global context ===
   let gptCtx = null;
+  let vadObj = null;
 
   // ---- try gpt4-vision-preview ---
   async function askAboutImage(imageUrl, prompt) {
@@ -393,6 +399,61 @@
   }
   -- */
 
+
+  // --- VAD ----
+
+  async function prepareVad() {
+    const myvad = await vad.MicVAD.new({
+      onSpeechStart: () => {
+        console.log("Speech start detected");
+      },
+      onSpeechEnd: async (audio) => {
+        // do something with `audio` (Float32Array of audio samples at sample rate 16000)...
+        console.log("audio sample length:", audio.length);
+
+        const wavBuffer = vad.utils.encodeWAV(audio);
+        const file = new File([wavBuffer], `audio.wav`);
+
+        const text = await speechToText(file, API_KEY);
+        console.log('STT res:', text);
+        showLog('User:' + text);
+
+        // --- send to GPT ---
+        try {
+          const response = await continueChatWithLastImage(text);
+          clearLog();
+          showLog(response.content);
+          await explainInVoice();
+        }
+        finally {
+          isWaitingForExplainImage = false;
+          updateUI();
+        }
+      }
+    })
+    return myvad;
+  }
+
+  async function startVAD() {
+    if (vadObj) {
+      stopVAD();
+    }
+
+    // -- start --
+    vadObj = await prepareVad();
+    vadObj.start();
+  }
+
+  function stopVAD() {
+    if (vadObj) {
+      vadObj.pause();
+      vadObj.stream.getTracks().forEach(function (track) {
+        track.stop();
+      });
+      vadObj = null;
+      console.log("vad stop")
+    }
+  }
 
   // --- initalize option ---
   function buildInitOptions() {
