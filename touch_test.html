@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <title>touch test</title>
+</head>
+
+<body>
+  <h2>touch test</h2>
+  <div id="touch_area" style="width: 300px; height: 300px; border: 1px solid black; background-color: gray;"
+    onclick="clicked()"
+    ondblclick="doubleClicked()"
+    onmousedown="mouseDown()"
+    ontouchstart="touchStart()"
+  >
+  </div>
+  <div id="touch_log"></div>
+</body>
+<script>
+  function clicked() {
+    log('clicked');
+  }
+
+  function doubleClicked() {
+    log('doubleClicked');
+  }
+
+  function mouseDown() {
+    log('mouseDown');
+    startPress();
+  }
+
+  function touchStart() {
+    log('touchStart');
+    startPress();
+  }
+
+  function touchEnd() {
+    log('touchEnd');
+  }
+
+  function log(msg) {
+    console.log(msg);
+    const log = document.getElementById('touch_log');
+    log.innerHTML = msg;
+  }
+
+  function startPress() {
+    log('startPress');
+    setTimeout(() => {
+      log('endPress');
+    }, 3000);
+  }
+</script>
+</html>
