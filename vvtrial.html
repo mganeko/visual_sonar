@@ -414,7 +414,8 @@
         const wavBuffer = vad.utils.encodeWAV(audio);
         const file = new File([wavBuffer], `audio.wav`);
 
-        const text = await speechToText(file, API_KEY);
+        const apiKey = getApiKey();
+        const text = await speechToText(file, apiKey);
         console.log('STT res:', text);
         showLog('User:' + text);
 
