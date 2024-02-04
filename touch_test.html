@@ -10,21 +10,22 @@
   <h2>touch test</h2>
   <div id="touch_area" style="width: 300px; height: 300px; border: 1px solid black; background-color: gray;"
     onclick="clicked()"
-    ondblclick="doubleClicked()"
     onmousedown="mouseDown()"
     ontouchstart="touchStart()"
+    ontouchend="touchEnd()"
   >
   </div>
   <div id="touch_log"></div>
 </body>
 <script>
   function clicked() {
+    cancelPress();
     log('clicked');
   }
 
-  function doubleClicked() {
-    log('doubleClicked');
-  }
+  // function doubleClicked() {
+  //   log('doubleClicked');
+  // }
 
   function mouseDown() {
     log('mouseDown');
@@ -38,19 +39,30 @@
 
   function touchEnd() {
     log('touchEnd');
+    cancelPress();
   }
 
   function log(msg) {
     console.log(msg);
     const log = document.getElementById('touch_log');
-    log.innerHTML = msg;
+    log.innerHTML += (msg + '<br>');
   }
 
+  let pressTimer = null;
   function startPress() {
     log('startPress');
-    setTimeout(() => {
-      log('endPress');
+    pressTimer = setTimeout(() => {
+      pressTimer = null;
+      log('long Press OK');
     }, 3000);
+  }
+
+  function cancelPress() {
+    if (pressTimer) {
+      clearTimeout(pressTimer);
+      pressTimer = null;
+      log('long Press Canceled');
+    }
   }
 </script>
 </html>
