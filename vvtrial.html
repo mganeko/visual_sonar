@@ -24,7 +24,7 @@
       onclick="startCamera()">Start</button>
     &nbsp;
     <br />
-    <button id="stop_button" style="font-size: large;" onclick="stopCamera()">Stop</button>
+    <button id="stop_button" style="font-size: large;" onclick="stopCameraAndVAD()">Stop</button>
     &nbsp;&nbsp;
     <button id="photo_voice_button" style="font-size: large;" onclick="takePhotoAndExplainInVoice()">Explain in
       Voice</button>
@@ -39,7 +39,10 @@
   <br />
 
   <video width="640" height="960" autoplay playsinline style="border: 1px gray solid; width:320px; height: 480px;"
-    onclick="takePhotoAndExplainInVoice()" ondblclick="stopCamera()"></video>
+    onclick="takePhotoAndExplainInVoice()"
+    onmousedown="startPress()" ontouchstart="startPress()"
+    onmouseup="cancelPress()" ontouchend="cancelPress()"
+  ></video>
   <br />
   <div id="explain_result" style="border: 1px gray solid; width:320px; height:240px; font-size: small;"></div>
   <br />
@@ -160,6 +163,30 @@
     divExplain.innerText += (str + '\n');;
   }
 
+  let pressTimer = null;
+  function startPress() {
+    console.log('startPress');
+    pressTimer = setTimeout(() => {
+      pressTimer = null;
+      console.log('long Press fired');
+      stopCameraAndVAD();
+    }, 3000);
+  }
+
+  function stopCameraAndVAD() {
+    stopCamera();
+    stopVAD();
+    playbackAudioUrl(playbackAudio, 'audio/camera_stop.mp3');
+  }
+
+  function cancelPress() {
+    if (pressTimer) {
+      clearTimeout(pressTimer);
+      pressTimer = null;
+      console.log('long Press Canceled');
+    }
+  }
+
   async function startCamera() {
     preparePlay(playbackAudio);
 
@@ -178,6 +205,8 @@
       // <video> エレメントにストリームを設定
       localVideo.srcObject = stream;
       await localVideo.play();
+
+      playbackAudioUrl(playbackAudio, 'audio/camera_ready.mp3');
     } catch (error) {
       //console.error('カメラのアクセスに失敗しました:', error);
       showLog('カメラのアクセスに失敗しました:' + error)
@@ -301,6 +330,8 @@
   }
 
   async function takePhotoAndExplainInVoice() {
+    cancelPress();
+
     isWaitingForTTS = true;
     isWaitingForExplainImage = true;
     disableElementById('photo_voice_button');
