@@ -232,6 +232,10 @@
     photo.width = localVideo.videoWidth;
     photo.height = localVideo.videoHeight;
     photo.src = dataURI;
+    photo.style.width = '320px';
+    if (localVideo.videoWidth > 0) {
+      photo.style.height = parseInt(320/localVideo.videoWidth * localVideo.videoHeight) + 'px';
+    }
 
     hasExplain = false;
     updateUI();
@@ -380,6 +384,7 @@
       workCanvas = document.createElement("canvas");
       workCanvas.width = video.videoWidth;
       workCanvas.height = video.videoHeight;
+      //workCanvas.style.width = '640px';
       workCtx = workCanvas.getContext("2d");
     }
 
