@@ -167,9 +167,9 @@
   const PRESS_TIMEOUT = 1500;
   function startPress(event) {
     console.log('startPress:', event);
-    if (event) {
-      event.preventDefault();
-    }
+    //if (event) {
+    //  event.preventDefault();
+    //}
     pressTimer = setTimeout(() => {
       pressTimer = null;
       console.log('long Press fired');
