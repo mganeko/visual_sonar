@@ -40,7 +40,7 @@
 
   <video width="640" height="960" autoplay playsinline style="border: 1px gray solid; width:320px; height: 480px;"
     onclick="takePhotoAndExplainInVoice()"
-    onmousedown="startPress()" ontouchstart="startPress()"
+    onmousedown="startPress()" ontouchstart="startPress(event)"
     onmouseup="cancelPress()" ontouchend="cancelPress()"
   ></video>
   <br />
@@ -165,8 +165,11 @@
 
   let pressTimer = null;
   const PRESS_TIMEOUT = 1500;
-  function startPress() {
-    console.log('startPress');
+  function startPress(event) {
+    console.log('startPress:', event);
+    if (event) {
+      event.preventDefault();
+    }
     pressTimer = setTimeout(() => {
       pressTimer = null;
       console.log('long Press fired');
