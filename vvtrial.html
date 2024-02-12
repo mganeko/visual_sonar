@@ -164,13 +164,14 @@
   }
 
   let pressTimer = null;
+  const PRESS_TIMEOUT = 1500;
   function startPress() {
     console.log('startPress');
     pressTimer = setTimeout(() => {
       pressTimer = null;
       console.log('long Press fired');
       stopCameraAndVAD();
-    }, 3000);
+    }, PRESS_TIMEOUT);
   }
 
   function stopCameraAndVAD() {
